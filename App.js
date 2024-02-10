@@ -2,6 +2,7 @@ const express = require("express");
 const cors = require("cors");
 
 const areaRoutes = require('./routes/areasRoutes')
+const userssRoute = require('./routes/userssRoute')
 
 const app = express();
 
@@ -9,6 +10,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/areas', areaRoutes);
+app.use('/users', userssRoute);
 
 app.get("/", (req, res) => {
   res.send("<h2>Back is working!</h2>");
