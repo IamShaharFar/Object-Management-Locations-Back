@@ -29,9 +29,13 @@ const objectSchema = new Schema({
       message: props => `${props.value} is not a valid latitude!`
     }
   },
+  userId: {
+    type: Schema.Types.ObjectId, 
+    ref: 'User' 
+  },
   areaId: {
     type: Schema.Types.ObjectId, 
-    ref: 'Area' 
+    ref: 'Area'
   },
   tagId: {
     type: Schema.Types.ObjectId, 

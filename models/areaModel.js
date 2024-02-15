@@ -44,15 +44,13 @@ const AreaSchema = new Schema({
     type: Number,
     required: [true, 'Radius is required']
   },
+  userId: {
+    type: Schema.Types.ObjectId, 
+    ref: 'User' 
+  },
   objects: [{
-    type: String,
-    validate: {
-      validator: function(v) {
-        // Check if each string in the array is a valid ObjectId
-        return ObjectId.isValid(v);
-      },
-      message: props => `${props.value} is not a valid ObjectId!`
-    }
+    type: Schema.Types.ObjectId,
+    ref: 'Object'
   }]
 });
 
