@@ -48,10 +48,10 @@ const AreaSchema = new Schema({
     type: Schema.Types.ObjectId, 
     ref: 'User' 
   },
-  objects: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Object'
-  }]
+  objects: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Object' }],
+    default: [] 
+  }
 });
 
 const Area = mongoose.model('Area', AreaSchema);

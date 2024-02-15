@@ -26,10 +26,10 @@ const UsersSchema = new Schema({
     unique: true,
     validate: [validator.isEmail, 'Please fill a valid email address'] 
   },
-  areas: [{
-    type: Schema.Types.ObjectId,
-    ref: 'Area'
-  }]
+  areas: {
+    type: [{ type: Schema.Types.ObjectId, ref: 'Area' }],
+    default: [] 
+  }
 });
 
 const User = mongoose.model('User', UsersSchema);
