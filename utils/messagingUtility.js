@@ -1,7 +1,7 @@
 //const cron = require("node-cron");
 const nodemailer = require("nodemailer");
 const accountSid = 'ACfc99f3968bcae8dff76c5c452acc4dbc';
-const authToken = 'a9825e8c52eacdda177710387064a528';
+const authToken = 'a1f8c818ad4ff5991debda77f75b19e5';
 const client = require('twilio')(accountSid, authToken);
 require("dotenv").config();
 
@@ -40,10 +40,12 @@ function sendWhatsApp(toNumber, messageBody) {
   client.messages
     .create({
       body: `${messageBody}`,
-      from: process.env.WHATSAPP_SENDER_NUMBER,
+      from: `whatsapp:+14155238886`,
       to: `whatsapp:${toNumber}`
     })
     .catch(error => console.error("Error sending message:", error));
+  // console.log("toNumber", toNumber);
+  // console.log("messageBody", messageBody)
 
 }
 

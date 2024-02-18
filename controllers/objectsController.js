@@ -1,5 +1,6 @@
 const ObjectModel = require('../models/objectModel');
 const Area = require('../models/areaModel');
+const axios = require('axios')
 
 // Helper function to determine if an error is a client-side error
 const isClientError = (error) => {
@@ -34,8 +35,20 @@ exports.fetchObjectById = async (req, res) => {
 exports.createObject = async (req, res) => {
   try {
     const newObject = new ObjectModel(req.body);
-    const savedObject = await newObject.save();
+    const axiosRequestBody = {
+      description: newObject.description,
+      Lat: newObject.lat,
+      Lng: newObject.lan 
+    };
+    const response = await axios.post(`${process.env.SAMSUNG_API_URL}/api/objects/create`, axiosRequestBody);
+    const tagId = response.data.insertedId; 
 
+    if (tagId) {
+      newObject.tagId = tagId;
+    }
+
+    const savedObject = await newObject.save();
+    console.log(Area.find({}))
     if (savedObject.areaId) {
       const area = await Area.findById(savedObject.areaId);
       if (!area) {
@@ -86,6 +99,10 @@ exports.deleteObjectById = async (req, res) => {
     if (!object) {
       return res.status(404).json({ message: 'Object not found' });
     }
+    await axios.delete(`${process.env.SAMSUNG_API_URL}/api/objects/delete/${object.tagId}`)
+      .catch(error => {
+        throw new Error(error.response ? error.response.data.message : 'Failed to delete object externally');
+      });
 
     if (object.areaId) {
       await Area.findByIdAndUpdate(object.areaId, { $pull: { objects: objectId } });
