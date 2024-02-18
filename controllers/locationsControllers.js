@@ -5,6 +5,7 @@ const { getIO } = require('../utils/socket');
 exports.start = async (req, res) => {
     const io = getIO();
     try {
+        //fetch the mock to start mooving the objects
         const objects = await objectModel.find({});
         (async () => {
             objectsIntersector.startUpdateClientLocations(objects, io);
@@ -18,6 +19,7 @@ exports.start = async (req, res) => {
 
 exports.stop = async (req, res) => {
     try {
+        //fetch the mock to stop mooving the objects
         (async () => {
             objectsIntersector.stopCheckingDistances();
         })();

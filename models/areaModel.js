@@ -27,8 +27,14 @@ const AreaSchema = new Schema({
     maxlength: [50, 'Name cannot be more than 50 characters long']
   },
   contactNumber: {
-    type: Number,
-    required: [true, 'Contact number is required']
+    type: String,
+    required: [true, 'Contact number is required'],
+    validate: {
+      validator: function(v) {
+        return /^\+[1-9]\d{1,14}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    }
   },
   centerLat: {
     type: Number,

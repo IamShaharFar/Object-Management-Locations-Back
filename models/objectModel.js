@@ -40,6 +40,10 @@ const objectSchema = new Schema({
   tagId: {
     type: Schema.Types.ObjectId, 
     required: true
+  },
+  lastNotifiedAt: {
+    type: Date,
+    default: null,
   }
 });
 

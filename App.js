@@ -11,6 +11,7 @@ const userssRoute = require('./routes/userssRoute')
 const objectsRoute = require('./routes/objectsRoutes')
 const authRoutes = require('./routes/authRoutes');
 const locationsRoute = require('./routes/locationsRoute');
+const emailSenderRoutes = require('./routes/emailSenderRoutes');
 
 const app = express();
 
@@ -28,6 +29,7 @@ app.use('/users', userssRoute);
 app.use('/objects', objectsRoute);
 app.use('/auth', authRoutes);
 app.use('/locations', locationsRoute);
+app.use('/email-sender', emailSenderRoutes);
 
 app.get("/", (req, res) => {
   res.send("<h2>Back is working!</h2>");

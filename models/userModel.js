@@ -17,8 +17,14 @@ const UsersSchema = new Schema({
     maxlength: [50, 'Second name cannot be more than 50 characters long']
   },
   phoneNumber: {
-    type: Number,
-    required: [true, 'Phone number is required']
+    type: String,
+    required: [true, 'Contact number is required'],
+    validate: {
+      validator: function(v) {
+        return /^\+[1-9]\d{1,14}$/.test(v);
+      },
+      message: props => `${props.value} is not a valid phone number!`
+    }
   },
   email: {
     type: String,
