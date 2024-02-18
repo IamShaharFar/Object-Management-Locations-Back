@@ -5,6 +5,7 @@ const Area = require('../models/areaModel');
 const User = require('../models/userModel');
 const { getSocketIdFromUserId } = require('./socket')
 const { sendWhatsApp } = require('./messagingUtility')
+const axios = require('axios')
 
 let intervalId = null;
 
@@ -13,6 +14,7 @@ exports.startUpdateClientLocations = (objects, io) => {
     console.log("Already checking distances.");
     return;
   }
+  axios.get('http://host.docker.internal:3001/api/mocActivator/start');
   intervalId = setInterval(async () => {
     //fetch tags locations by area id
     //update the new object location in the db
@@ -60,7 +62,7 @@ const lookForCrossedObject = async (io) => {
       if (shouldNotify.length > 0) {
         console.log("shouldNotify", shouldNotify)
         const user = await User.findById(shouldNotify[0].userId)
-        const areaName = area.name; 
+        const areaName = area.name;
         let message = `🚨 **Important Alert** 🚨\n\nHi ${user.name}, we\'ve detected some of your objects have moved outside their allowed area "${areaName}":\n`;
         shouldNotify.forEach(obj => {
           message += `\n- **Object**: ${obj.description}\n`;
@@ -88,18 +90,19 @@ async function fetchAndUpdateObjects() {
   try {
     // Fetch all objects to get their tagIds
     const allObjects = await objectModel.find({});
-    const tagIds = objects.map(obj => obj.tagId);
+    const tagIds = allObjects.map(obj => obj.tagId);
 
     // Fetch data from the external API using axios
-    const response = await axios.post('http://localhost:4000/api/objects/getsome', {
+    const response = await axios.post('http://host.docker.internal:4000/api/objects/getsome', {
       _ids: tagIds
     });
+    console.log(response.data[0])
 
     const tags = response.data; // Axios stores the response data in the .data property
 
     // Update each object with the new lan and lat from the tags
     for (const tag of tags) {
-      await ObjectModel.findOneAndUpdate(
+      await objectModel.findOneAndUpdate(
         { tagId: tag._id }, // filter
         { lat: tag.Lat, lan: tag.Lng }, // update
         { new: true } // options
@@ -117,7 +120,7 @@ exports.stopCheckingDistances = () => {
     console.log("No distance check in progress.");
     return;
   }
-
+  axios.get('http://host.docker.internal:3001/api/mocActivator/stop');
   clearInterval(intervalId);
   intervalId = null;
   console.log("Stopped checking distances.");

@@ -26,7 +26,7 @@ const objectSchema = new Schema({
       validator: function(v) {
         return v >= -90 && v <= 90;
       },
-      message: props => `${props.value} is not a valid latitude!`
+      message: props => `${props.value} is not a valnode-fetchid latitude!`
     }
   },
   userId: {
