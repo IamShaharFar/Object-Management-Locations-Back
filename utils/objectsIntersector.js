@@ -14,7 +14,7 @@ exports.startUpdateClientLocations = (objects, io) => {
     console.log("Already checking distances.");
     return;
   }
-  axios.get('http://host.docker.internal:3001/api/mocActivator/start');
+  axios.get(`${process.env.MOCK_API_URL}/api/mocActivator/start`);
   intervalId = setInterval(async () => {
     //fetch tags locations by area id
     //update the new object location in the db
@@ -93,7 +93,7 @@ async function fetchAndUpdateObjects() {
     const tagIds = allObjects.map(obj => obj.tagId);
 
     // Fetch data from the external API using axios
-    const response = await axios.post('http://host.docker.internal:4000/api/objects/getsome', {
+    const response = await axios.post(`${process.env.SAMSUNG_API_URL}/api/objects/getsome`, {
       _ids: tagIds
     });
     console.log(response.data[0])
@@ -120,7 +120,7 @@ exports.stopCheckingDistances = () => {
     console.log("No distance check in progress.");
     return;
   }
-  axios.get('http://host.docker.internal:3001/api/mocActivator/stop');
+  axios.get(`${process.env.MOCK_API_URL}/api/mocActivator/stop`);
   clearInterval(intervalId);
   intervalId = null;
   console.log("Stopped checking distances.");

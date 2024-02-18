@@ -1,4 +1,5 @@
-const ObjectModel = require('../models/objectModel'); 
+const ObjectModel = require('../models/objectModel');
+const Area = require('../models/areaModel');
 
 // Helper function to determine if an error is a client-side error
 const isClientError = (error) => {
@@ -33,8 +34,18 @@ exports.fetchObjectById = async (req, res) => {
 exports.createObject = async (req, res) => {
   try {
     const newObject = new ObjectModel(req.body);
-    await newObject.save();
-    res.status(201).json(newObject);
+    const savedObject = await newObject.save();
+
+    if (savedObject.areaId) {
+      const area = await Area.findById(savedObject.areaId);
+      if (!area) {
+        return res.status(404).json({ message: 'Area not found' });
+      }
+      area.objects.push(savedObject._id);
+      await area.save();
+    }
+
+    res.status(201).json(savedObject);
   } catch (error) {
     res.status(isClientError(error) ? 400 : 500).json({ message: error.message });
   }
@@ -43,25 +54,46 @@ exports.createObject = async (req, res) => {
 // Update an object by ID
 exports.updateObjectById = async (req, res) => {
   try {
-    const updatedObject = await ObjectModel.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedObject) {
+    const objectId = req.params.id;
+    const updates = req.body;
+
+    const object = await ObjectModel.findById(objectId);
+    if (!object) {
       return res.status(404).json({ message: 'Object not found' });
     }
+
+    if (updates.areaId && updates.areaId !== object.areaId.toString()) {
+      if (object.areaId) {
+        await Area.findByIdAndUpdate(object.areaId, { $pull: { objects: objectId } });
+      }
+      await Area.findByIdAndUpdate(updates.areaId, { $addToSet: { objects: objectId } });
+    }
+
+    const updatedObject = await ObjectModel.findByIdAndUpdate(objectId, updates, { new: true, runValidators: true });
     res.status(200).json(updatedObject);
   } catch (error) {
-    res.status(isClientError(error) ? 400 : 500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
+
 
 // Delete an object by ID
 exports.deleteObjectById = async (req, res) => {
   try {
-    const result = await ObjectModel.findByIdAndDelete(req.params.id);
-    if (!result) {
+    const objectId = req.params.id;
+
+    const object = await ObjectModel.findById(objectId);
+    if (!object) {
       return res.status(404).json({ message: 'Object not found' });
     }
+
+    if (object.areaId) {
+      await Area.findByIdAndUpdate(object.areaId, { $pull: { objects: objectId } });
+    }
+
+    await ObjectModel.findByIdAndDelete(objectId);
     res.status(200).json({ message: 'Object successfully deleted' });
   } catch (error) {
-    res.status(isClientError(error) ? 400 : 500).json({ message: error.message });
+    res.status(500).json({ message: error.message });
   }
 };
