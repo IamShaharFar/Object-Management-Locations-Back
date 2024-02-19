@@ -3,6 +3,9 @@ const objectController = require('../controllers/objectsController');
 
 const router = express.Router();
 
+// Route to fetch all objects by userId
+router.get('/fetchByUserId', objectController.fetchObjectsByUserId);
+
 // Route to fetch an object by its ID
 router.get('/:id', objectController.fetchObjectById);
 

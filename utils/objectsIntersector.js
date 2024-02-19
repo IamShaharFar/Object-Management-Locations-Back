@@ -91,16 +91,19 @@ async function fetchAndUpdateObjects() {
     // Fetch all objects to get their tagIds
     const allObjects = await objectModel.find({});
     const tagIds = allObjects.map(obj => obj.tagId);
+    console.log("tagIds", tagIds)
 
     // Fetch data from the external API using axios
-    const response = await axios.post(`${process.env.SAMSUNG_API_URL}/api/objects/getsome`, {
-      _ids: tagIds
+    const response = await axios.get(`${process.env.SAMSUNG_API_URL}/api/objects/getsome`, {
+      params: { _ids: tagIds },
+      headers: {
+        'Content-Type': 'application/json'
+      }
     });
     console.log(response.data[0])
 
-    const tags = response.data; // Axios stores the response data in the .data property
+    const tags = response.data; 
 
-    // Update each object with the new lan and lat from the tags
     for (const tag of tags) {
       await objectModel.findOneAndUpdate(
         { tagId: tag._id }, // filter

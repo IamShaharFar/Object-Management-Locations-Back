@@ -19,6 +19,25 @@ exports.fetchAreaById = async (req, res) => {
   }
 };
 
+// Fetch all areas by userId
+exports.fetchAreasByUserId = async (req, res) => {
+  try {
+    const userId = req.body.userId; 
+
+    if (!userId) {
+      return res.status(400).json({ message: 'UserId is required' });
+    }
+
+    const areas = await Area.find({ userId: userId }).exec();
+
+    res.status(200).json(areas);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error occurred while fetching areas by userId.', error: error.message });
+  }
+};
+
+
+
 // Fetch all areas
 exports.fetchAllAreas = async (req, res) => {
   try {

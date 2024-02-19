@@ -18,6 +18,24 @@ exports.fetchAllObjects = async (req, res) => {
   }
 };
 
+// Fetch all objects by userId
+exports.fetchObjectsByUserId = async (req, res) => {
+  try {
+    const userId = req.body.userId; 
+
+    if (!userId) {
+      return res.status(400).json({ message: 'UserId is required' });
+    }
+
+    const objects = await ObjectModel.find({ userId: userId });
+
+    res.status(200).json(objects);
+  } catch (error) {
+    res.status(isClientError(error) ? 400 : 500).json({ message: error.message });
+  }
+};
+
+
 // Fetch an object by ID
 exports.fetchObjectById = async (req, res) => {
   try {
@@ -38,10 +56,10 @@ exports.createObject = async (req, res) => {
     const axiosRequestBody = {
       description: newObject.description,
       Lat: newObject.lat,
-      Lng: newObject.lan 
+      Lng: newObject.lan
     };
     const response = await axios.post(`${process.env.SAMSUNG_API_URL}/api/objects/create`, axiosRequestBody);
-    const tagId = response.data.insertedId; 
+    const tagId = response.data.insertedId;
 
     if (tagId) {
       newObject.tagId = tagId;
