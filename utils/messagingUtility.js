@@ -6,18 +6,19 @@ const client = require('twilio')(accountSid, authToken);
 require("dotenv").config();
 
 // Nodemailer setup for Mailtrap
-var transport = nodemailer.createTransport({
-  host: "smtp.sendgrid.net",
-  port: 587,
+let transporter = nodemailer.createTransport({
+  host: "smtp.mail.yahoo.com",
+  port: 465, // Secure SMTP port
+  secure: true, 
   auth: {
-    user: "apikey",
-    pass: "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",
-  },
+      user: 'catchitmamram@yahoo.com', 
+      pass: 'imu$p3#4B-M!C.q' 
+  }
 });
 
 function sendEmail(toMail, subject, mailBody) {
   const mailOptions = {
-    from: "kikbatovski123456@gmail.com",
+    from: "catchitmamram@yahoo.com",
     to: toMail,
     subject: subject,
     text: mailBody,
@@ -25,7 +26,7 @@ function sendEmail(toMail, subject, mailBody) {
   console.log("sending email to", toMail);
 
   return new Promise((resolve, reject) => {
-    transport.sendMail(mailOptions, (error, info) => {
+    transporter.sendMail(mailOptions, (error, info) => {
       if (error) {
         console.error("Error sending test email:", error);
         reject(error);
@@ -37,6 +38,8 @@ function sendEmail(toMail, subject, mailBody) {
 }
 
 function sendWhatsApp(toNumber, messageBody) {
+  console.log("in whatsapp")
+  console.log("toNumber", toNumber)
   client.messages
     .create({
       body: `${messageBody}`,
@@ -44,6 +47,7 @@ function sendWhatsApp(toNumber, messageBody) {
       to: `whatsapp:${toNumber}`
     })
     .catch(error => console.error("Error sending message:", error));
+    console.log("finished whatsapp")
   // console.log("toNumber", toNumber);
   // console.log("messageBody", messageBody)
 
