@@ -5,7 +5,7 @@ exports.login = async (req, res) => {
 
   try {
     const user = await User.findOne({ email });
-
+    console.log("body", req.body)
     if (user) {
       if (password === "1111") {
         return res.status(200).json({
