@@ -36,14 +36,31 @@ exports.pushOut = async (req, res) => {
 
     const url = `${process.env.MOCK_API_URL}/api/mockActivator/pushOut`;
 
-    const data = {
-      id: req.body.areaId,
-      meters: 300
+    const bodyData = {
+      id: req.body.tagId, // Ensure this value is correctly obtained from your request body
     };
-
-    axios.post(url, data);
-
-    // Process the response
+    
+    console.log("tagId", url);
+    
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(bodyData),
+    })
+    .then(response => {
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json(); // Assuming you want to process the JSON response
+    })
+    .then(data => {
+      console.log(data); // Process your response data here
+    })
+    .catch(error => {
+      console.error("Error on push out", error);
+    });
     res.status(200).json({
       message: 'Mooving Object Outside'
     });

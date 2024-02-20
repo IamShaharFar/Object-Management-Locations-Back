@@ -4,7 +4,7 @@ const objectModel = require('../models/objectModel');
 const Area = require('../models/areaModel');
 const User = require('../models/userModel');
 const { getSocketIdFromUserId } = require('./socket')
-const { sendWhatsApp } = require('./messagingUtility')
+const { sendEmail } = require('./messagingUtility')
 const axios = require('axios')
 
 let intervalId = null;
@@ -18,9 +18,9 @@ exports.startUpdateClientLocations = (objects, io) => {
   intervalId = setInterval(async () => {
     //fetch tags locations by area id
     //update the new object location in the db
-    await fetchAndUpdateObjects();
+    const updatedObjects = await fetchAndUpdateObjects();
     await lookForCrossedObject(io);
-    const objectsByUserId = objects.reduce((acc, obj) => {
+    const objectsByUserId = updatedObjects.reduce((acc, obj) => {
       acc[obj.userId] = acc[obj.userId] || [];
       acc[obj.userId].push(obj);
       return acc;
@@ -30,6 +30,7 @@ exports.startUpdateClientLocations = (objects, io) => {
     for (const [userId, userObjects] of Object.entries(objectsByUserId)) {
       const socketId = await getSocketIdFromUserId(userId);
       if (socketId) {
+        console.log("");
         io.to(socketId).emit('userObjects', userObjects);
       }
     }
@@ -54,7 +55,8 @@ const lookForCrossedObject = async (io) => {
     for (const area of areas) {
       console.log("area", area.name)
       const areaObjects = objectsByAreaId[area._id.toString()] || [];
-      const socketId = await getSocketIdFromUserId("65cc975a848b94b95a1b874e")
+      const socketId = getSocketIdFromUserId(area.userId)
+      console.log("socketId - ", socketId, area._id, area.userId)
       const farObjects = geoDistance.checkObjectsFarFromCenter(areaObjects, area);
       const shouldNotify = farObjects.filter(obj =>
         !obj.lastNotifiedAt || obj.lastNotifiedAt < fourHoursAgo
@@ -63,19 +65,23 @@ const lookForCrossedObject = async (io) => {
         console.log("shouldNotify", shouldNotify)
         const user = await User.findById(shouldNotify[0].userId)
         const areaName = area.name;
+        let subject = "URGENT: Your Objects Have Escaped! Check Your Data Now!";
         let message = `🚨 **Important Alert** 🚨\n\nHi ${user.name}, we\'ve detected some of your objects have moved outside their allowed area "${areaName}":\n`;
         shouldNotify.forEach(obj => {
           message += `\n- **Object**: ${obj.description}\n`;
         });
         message += '\nPlease check and take necessary action. Contact us for help or questions.\n\nThank you!';
-        sendWhatsApp(area.contactNumber, message);
+        // sendWhatsApp(area.contactNumber, message);
+        sendEmail(area.contactEmail, subject, message);
 
         shouldNotify.forEach(async obj => {
           await objectModel.findByIdAndUpdate(obj._id, { lastNotifiedAt: now });
         });
 
+        console.log("socketId", socketId)
         // Emit the event
         if (socketId) {
+          console.log("emitting");
           io.to(socketId).emit('objectCrossed', shouldNotify);
         }
       }
@@ -100,19 +106,21 @@ async function fetchAndUpdateObjects() {
         'Content-Type': 'application/json'
       }
     });
-    console.log(response.data[0])
 
     const tags = response.data; 
+    const updatedObjects = [];
 
     for (const tag of tags) {
-      await objectModel.findOneAndUpdate(
+      const updated = await objectModel.findOneAndUpdate(
         { tagId: tag._id }, // filter
         { lat: tag.Lat, lan: tag.Lng }, // update
-        { new: true } // options
+        { new: true } // options to return the updated document
       );
+      if (updated) updatedObjects.push(updated); 
     }
 
     console.log('All matching objects have been updated with new lan and lat values.');
+    return updatedObjects;
   } catch (error) {
     console.error(`Failed to fetch and update objects: ${error.message}`);
   }

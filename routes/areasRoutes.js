@@ -3,7 +3,7 @@ const areaController = require('../controllers/areasContoller');
 
 const router = express.Router();
 
-router.get('/fetchByUserId', areaController.fetchAreasByUserId);
+router.post('/fetchByUserId', areaController.fetchAreasByUserId);
 router.get('/:id', areaController.fetchAreaById);
 router.get('/', areaController.fetchAllAreas);
 router.post('/', areaController.createArea);

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
-const ObjectId = Schema.Types.ObjectId;
+const validator = require('validator');
 
 // Custom validator for latitude
 const latitudeValidator = {
@@ -35,6 +35,11 @@ const AreaSchema = new Schema({
       },
       message: props => `${props.value} is not a valid phone number!`
     }
+  },
+  contactEmail: {
+    type: String,
+    required: [true, 'Email is required'],
+    validate: [validator.isEmail, 'Please fill a valid email address'] 
   },
   centerLat: {
     type: Number,

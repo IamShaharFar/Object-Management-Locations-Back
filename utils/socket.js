@@ -4,7 +4,14 @@ const userSocketMap = new Map();
 let io;
 
 const init = async (httpServer) => {
-  io = require("socket.io")(httpServer);
+  io = require("socket.io")(httpServer, {
+    cors: {
+      origin: "*", // Client's origin
+      methods: ["GET", "POST"],
+      allowedHeaders: ["my-custom-header"],
+      credentials: true
+    }
+  });
   return io;
 }
 const getIO = () => {
@@ -33,9 +40,9 @@ const socketIoSetup = (server) => {
 };
 
 // Function to get socket ID from user ID
-const getSocketIdFromUserId = async (userId) => {
-  const socketId = await userSocketMap.get(userId);
-  //console.log("socketId in", socketId)
+const getSocketIdFromUserId = (userId) => {
+  console.log("Map contents:", Array.from(userSocketMap.entries()));
+  const socketId = userSocketMap.get(userId.toString());
   return socketId;
 };
 

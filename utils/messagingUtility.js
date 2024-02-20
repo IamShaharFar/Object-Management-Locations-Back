@@ -1,40 +1,30 @@
 //const cron = require("node-cron");
-const nodemailer = require("nodemailer");
 const accountSid = 'ACfc99f3968bcae8dff76c5c452acc4dbc';
 const authToken = 'a1f8c818ad4ff5991debda77f75b19e5';
 const client = require('twilio')(accountSid, authToken);
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 require("dotenv").config();
 
-// Nodemailer setup for Mailtrap
-let transporter = nodemailer.createTransport({
-  host: "smtp.mail.yahoo.com",
-  port: 465, // Secure SMTP port
-  secure: true, 
-  auth: {
-      user: 'catchitmamram@yahoo.com', 
-      pass: 'imu$p3#4B-M!C.q' 
-  }
-});
+
 
 function sendEmail(toMail, subject, mailBody) {
-  const mailOptions = {
-    from: "catchitmamram@yahoo.com",
-    to: toMail,
+  console.log("in mail");
+  const msg = {
+    to: toMail, 
+    from: 'kikbatovski123456@gmail.com',
     subject: subject,
     text: mailBody,
   };
-  console.log("sending email to", toMail);
-
-  return new Promise((resolve, reject) => {
-    transporter.sendMail(mailOptions, (error, info) => {
-      if (error) {
-        console.error("Error sending test email:", error);
-        reject(error);
-      } else {
-        resolve(info);
-      }
+  
+  sgMail
+    .send(msg)
+    .then(() => {
+      console.log('Email sent');
+    })
+    .catch((error) => {
+      console.error(error);
     });
-  });
 }
 
 function sendWhatsApp(toNumber, messageBody) {
